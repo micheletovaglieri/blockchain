@@ -1,0 +1,45 @@
+// Tovacoin ICO
+pragma solidity ^0.5.1;
+contract tovacoin.ico {
+    //Introducing the total number of Tovacoin avaiable for sale 
+    uint public max_tovacoins = 1000000;
+    
+    //Introducing the USD to hadcoins conversion rate 
+    uint public usd_to_tovacoin = 1000;
+    
+    //Introducing the total number of Tovacoin that have been bought by the investor
+    uint public total_tovacoin_bought = 0;
+    
+    //Mapping from the investor address to its equity in Tovacoin and USD 
+    mapping(address => uint) equity_tovacoins;
+    mapping(address => uint) equity_usd;
+    
+    //Checking if an investor can buy tovacoins 
+    modifier can_buy_tovacoins(uint usd_invested) {
+        require (usd_invested * usd_to_tovacoins + total_tovacoin_bought <= max_tovacoins);
+        _;
+    }
+    //Getting the equity in Tovacoins of an investor
+    function equity_in_tovacoins(address investor) external constant returns (uint) {
+        return equity_tovacoins[investor]
+    }
+    
+    // Getting the equity in USD of an investor
+    function equity_in_usd(address investor) external constant returns (uint) {
+        return equity_usd[investor]
+    }
+    // Buying Tovacoins
+    function buy_tovacoins(address investor, uint usd_invested) external
+    can_buy_tovacoins(usd_invested) {
+        uint tovacoins_bought = usd_invested * usd_to_tovacoins;
+        equity_tovacoins[investor] += tovacoins_bought;
+        equity_usd[investor] = equity_tovacoins / usd_to_tovacoins;
+        total_tovacoin_bought +=tovacoins_bought;
+    }
+    // Selling tovacoins
+    function sell_tovacoins(address investor, uint tovacoins_sold) external {
+        equity_tovacoins[investor] += tovacoins_sold;
+        equity_usd[investor] = equity_tovacoins / usd_to_tovacoins;
+        total_tovacoin_bought -=  tovacoins_sold;
+    }
+}
